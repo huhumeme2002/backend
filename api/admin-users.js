@@ -10,9 +10,11 @@ const pool = new Pool({
 });
 
 module.exports = async function handler(req, res) {
+  // Enhanced CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
   
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -42,7 +44,7 @@ module.exports = async function handler(req, res) {
       const search = req.query.search || '';
 
       let query = `
-        SELECT id, username, email, requests, role, is_active, created_at,
+        SELECT id, username, email, requests, role, is_active, created_at, expires_at,
                (SELECT COUNT(*) FROM request_transactions WHERE user_id = users.id) as transaction_count
         FROM users
       `;
@@ -84,7 +86,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'User ID là bắt buộc' });
       }
 
-      const allowedUpdates = ['role', 'is_active', 'requests'];
+      const allowedUpdates = ['role', 'is_active', 'requests', 'expires_at'];
       const updateFields = [];
       const updateValues = [];
       let paramIndex = 1;
@@ -102,10 +104,10 @@ module.exports = async function handler(req, res) {
       }
 
       const updateQuery = `
-        UPDATE users 
-        SET ${updateFields.join(', ')} 
+        UPDATE users
+        SET ${updateFields.join(', ')}
         WHERE id = $${paramIndex}
-        RETURNING id, username, email, requests, role, is_active
+        RETURNING id, username, email, requests, role, is_active, expires_at
       `;
       updateValues.push(userId);
 

@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/auth/register",
+      "destination": "/api/register-db"
+    },
+    {
+      "source": "/api/auth/login", 
+      "destination": "/api/login-db"
+    },
+    {
+      "source": "/api/keys/redeem", 
+      "destination": "/api/redeem-key"
+    },
+    {
+      "source": "/api/test-database", 
+      "destination": "/api/test-db"
+    },
+    {
+      "source": "/api/simple-test", 
+      "destination": "/api/simple-test"
+    },
+    {
+      "source": "/api/test-connect", 
+      "destination": "/api/test-connect"
+    },
+    {
+      "source": "/api/init-database", 
+      "destination": "/api/init-db"
+    },
+    {
+      "source": "/api/admin/create-admin",
+      "destination": "/api/create-admin"
+    },
+    {
+      "source": "/api/admin/users",
+      "destination": "/api/admin-users"
+    },
+    {
+      "source": "/api/admin/analytics",
+      "destination": "/api/admin-analytics"
+    },
+    {
+      "source": "/api/admin/keys",
+      "destination": "/api/admin-keys"
+    },
+    {
+      "source": "/api/admin/upload-tokens",
+      "destination": "/api/admin-upload-tokens"
+    },
+    {
+      "source": "/api/admin/manage-users",
+      "destination": "/api/admin-manage-users"
+    },
+    {
+      "source": "/api/update-schema",
+      "destination": "/api/update-schema"
+    },
+    {
+      "source": "/api/redeem-token",
+      "destination": "/api/redeem-token"
+    },
+    {
+      "source": "/api/create-test-token",
+      "destination": "/api/create-test-token"
+    },
+    {
+      "source": "/api/fix-database-schema",
+      "destination": "/api/fix-database-schema"
+    },
+    {
+      "source": "/api/generate-token",
+      "destination": "/api/generate-token"
+    }
+  ]
+}

@@ -88,6 +88,10 @@
     {
       "source": "/api/admin/notifications",
       "destination": "/api/admin-notifications"
+    },
+    {
+      "source": "/api/user/profile",
+      "destination": "/api/user-profile"
     }
   ]
 }

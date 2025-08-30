@@ -10,14 +10,20 @@ const pool = new Pool({
 });
 
 module.exports = async function handler(req, res) {
-  // Enhanced CORS headers
+  // Comprehensive CORS headers for Vercel
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, User-Agent, DNT, Cache-Control, X-Mx-ReqToken, Keep-Alive, X-Requested-With, If-Modified-Since, X-CSRF-Token');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400');
 
+  // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
+    res.status(200).json({
+      message: 'CORS preflight successful',
+      methods: 'GET, POST, PUT, DELETE, OPTIONS',
+      headers: 'Content-Type, Authorization, X-Requested-With'
+    });
     return;
   }
 
@@ -84,6 +90,10 @@ module.exports = async function handler(req, res) {
 
   } catch (error) {
     console.error('User profile error:', error);
+    // Ensure CORS headers are set even on error
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     res.status(500).json({
       error: 'Lỗi server',
       details: error.message

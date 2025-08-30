@@ -54,6 +54,10 @@
       "destination": "/api/admin-manage-users"
     },
     {
+      "source": "/api/admin/blocked-users",
+      "destination": "/api/admin-blocked-users"
+    },
+    {
       "source": "/api/update-schema",
       "destination": "/api/update-schema"
     },

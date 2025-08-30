@@ -36,71 +36,81 @@ module.exports = async function handler(req, res) {
   try {
     client = await pool.connect();
 
-    // Find the next available token
-    const tokenResult = await client.query(
+    // Atomic reservation of a token + deduction of 50 requests
+    await client.query('BEGIN');
+
+    // Lock one available token to avoid concurrent duplication
+    const tokenLockResult = await client.query(
       `SELECT id, token_value, requests, expires_at, description
-       FROM uploaded_tokens 
-       WHERE is_used = false 
+       FROM uploaded_tokens
+       WHERE is_used = false
+         AND used_by IS NULL
          AND (expires_at IS NULL OR expires_at > NOW())
        ORDER BY created_at ASC
+       FOR UPDATE SKIP LOCKED
        LIMIT 1`
     );
 
-    if (tokenResult.rows.length === 0) {
-      return res.status(404).json({ 
-        error: 'Không có token nào có sẵn. Vui lòng liên hệ admin để upload thêm token.' 
-      });
-    }
-
-    const availableToken = tokenResult.rows[0];
-
-    // Mark token as used
-    await client.query('BEGIN');
-
-    try {
-      await client.query(
-        `UPDATE uploaded_tokens 
-         SET is_used = true, used_by = $1, used_at = NOW() 
-         WHERE id = $2`,
-        [userId, availableToken.id]
-      );
-
-      // Update user requests
-      const userUpdateResult = await client.query(
-        `UPDATE users 
-         SET requests = requests + $1 
-         WHERE id = $2 
-         RETURNING username, requests`,
-        [availableToken.requests, userId]
-      );
-
-      if (userUpdateResult.rows.length === 0) {
-        throw new Error('User not found');
-      }
-
-      const updatedUser = userUpdateResult.rows[0];
-
-      // Record transaction
-      await client.query(
-        `INSERT INTO request_transactions (user_id, requests_amount, description, created_at) 
-         VALUES ($1, $2, $3, NOW())`,
-        [userId, availableToken.requests, `Lấy token: ${availableToken.token_value}`]
-      );
-
-      await client.query('COMMIT');
-
-      res.status(200).json({
-        message: 'Lấy token thành công!',
-        token_value: availableToken.token_value,
-        requests_received: availableToken.requests,
-        new_requests: updatedUser.requests,
-        description: availableToken.description
-      });
-
-    } catch (transactionError) {
+    if (tokenLockResult.rows.length === 0) {
       await client.query('ROLLBACK');
-      throw transactionError;
+      return res.status(404).json({
+        error: 'Không có token nào có sẵn. Vui lòng liên hệ admin để upload thêm token.'
+      });
     }
+
+    const tokenRow = tokenLockResult.rows[0];
+
+    // Ensure user has at least 50 requests
+    const userRes = await client.query(
+      'SELECT id, username, requests FROM users WHERE id = $1 FOR UPDATE',
+      [userId]
+    );
+    if (userRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const currentRequests = userRes.rows[0].requests || 0;
+    const cost = 50;
+    if (currentRequests < cost) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: `Cần ít nhất ${cost} requests để lấy token` });
+    }
+
+    // Mark token as used by this user
+    await client.query(
+      `UPDATE uploaded_tokens
+       SET is_used = true, used_by = $1, used_at = NOW()
+       WHERE id = $2`,
+      [userId, tokenRow.id]
+    );
+
+    // Deduct cost from user requests
+    const userUpdateResult = await client.query(
+      `UPDATE users
+       SET requests = requests - $1
+       WHERE id = $2
+       RETURNING username, requests`,
+      [cost, userId]
+    );
+
+    // Log transaction as a negative request usage
+    await client.query(
+      `INSERT INTO request_transactions (user_id, requests_amount, description, created_at)
+       VALUES ($1, $2, $3, NOW())`,
+      [userId, -cost, `Lấy token: ${tokenRow.token_value}${tokenRow.description ? ' - ' + tokenRow.description : ''}`]
+    );
+
+    await client.query('COMMIT');
+
+    const updatedUser = userUpdateResult.rows[0];
+
+    res.status(200).json({
+      message: 'Lấy token thành công!',
+      token_value: tokenRow.token_value,
+      cost,
+      new_requests: updatedUser.requests,
+      description: tokenRow.description
+    });
 
   } catch (error) {
     console.error('Get token error:', error);

@@ -42,16 +42,21 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Title and content are required' });
       }
 
-      // Log the notification in admin activities
-      const result = await client.query(
-        'INSERT INTO admin_activities (admin_id, activity_type, description, new_value, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-        [
-          req.user.id,
-          'send_notification',
-          `Admin ${req.user.username} sent notification: ${title}`,
-          JSON.stringify({ title, content, type, recipient })
-        ]
-      );
+      // Log the notification (optional - skip if admin_activities table doesn't exist)
+      try {
+        const result = await client.query(
+          'INSERT INTO admin_activities (admin_id, activity_type, description, new_value, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
+          [
+            req.user.id,
+            'send_notification',
+            `Admin ${req.user.username} sent notification: ${title}`,
+            JSON.stringify({ title, content, type, recipient })
+          ]
+        );
+      } catch (logError) {
+        // Ignore logging error - notification still works
+        console.log('Could not log notification to admin_activities:', logError.message);
+      }
 
       res.status(200).json({
         message: 'Notification sent successfully',

@@ -76,6 +76,18 @@
     {
       "source": "/api/generate-token",
       "destination": "/api/generate-token"
+    },
+    {
+      "source": "/api/generate-login-code",
+      "destination": "/api/generate-login-code"
+    },
+    {
+      "source": "/api/get-daily-login",
+      "destination": "/api/generate-login-code"
+    },
+    {
+      "source": "/api/admin/notifications",
+      "destination": "/api/admin-notifications"
     }
   ]
 }

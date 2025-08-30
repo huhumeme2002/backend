@@ -125,6 +125,10 @@
       "destination": "/api/global-login-code"
     },
     {
+      "source": "/api/user/profile",
+      "destination": "/api/user-profile"
+    },
+    {
       "source": "/api/test-cors",
       "destination": "/api/test-cors"
     }

@@ -131,6 +131,10 @@
     {
       "source": "/api/test-cors",
       "destination": "/api/test-cors"
+    },
+    {
+      "source": "/api/check-balance",
+      "destination": "/api/check-balance"
     }
   ]
 }

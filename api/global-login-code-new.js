@@ -43,10 +43,10 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const userResult = await client.query(`
         SELECT 
-          expiry_time,
+          expires_at,
           CASE 
-            WHEN expiry_time IS NULL THEN true
-            WHEN expiry_time > NOW() THEN false 
+            WHEN expires_at IS NULL THEN false -- null means no limit
+            WHEN expires_at > NOW() THEN false 
             ELSE true 
           END as is_expired
         FROM users 
@@ -58,13 +58,6 @@ module.exports = async function handler(req, res) {
       }
 
       const user = userResult.rows[0];
-
-      // Check if user has never redeemed key
-      if (user.expiry_time === null) {
-        return res.status(403).json({ 
-          error: 'Bạn chưa redeem key nào. Hãy redeem key trước khi lấy mã login.' 
-        });
-      }
 
       // Check if expired
       if (user.is_expired) {

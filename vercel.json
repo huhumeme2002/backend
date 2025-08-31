@@ -121,6 +121,10 @@
       "destination": "/api/user/profile"
     },
     {
+      "source": "/api/profile",
+      "destination": "/api/profile"
+    },
+    {
       "source": "/api/global-login-code",
       "destination": "/api/global-login-code"
     },

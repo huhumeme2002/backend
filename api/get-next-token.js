@@ -100,6 +100,8 @@ module.exports = async function handler(req, res) {
       [userId, -cost, `Lấy token: ${tokenRow.token_value}${tokenRow.description ? ' - ' + tokenRow.description : ''}`]
     );
 
+    console.log(`DEBUG: User ${userId} deducted ${cost} requests. New balance: ${userUpdateResult.rows[0].requests}`);
+
     await client.query('COMMIT');
 
     const updatedUser = userUpdateResult.rows[0];

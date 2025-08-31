@@ -60,12 +60,12 @@ module.exports = async function handler(req, res) {
         u.role,
         u.is_active,
         u.created_at,
-        u.expiry_time,
+        u.expires_at,
         COUNT(rt.id) as transaction_count
       FROM users u
       LEFT JOIN request_transactions rt ON u.id = rt.user_id
       WHERE u.id = $1
-      GROUP BY u.id, u.username, u.email, u.requests, u.role, u.is_active, u.created_at, u.expiry_time
+      GROUP BY u.id, u.username, u.email, u.requests, u.role, u.is_active, u.created_at, u.expires_at
     `, [userId]);
 
     if (result.rows.length === 0) {
@@ -75,15 +75,26 @@ module.exports = async function handler(req, res) {
     const user = result.rows[0];
 
     res.status(200).json({
+      // flat shape for convenience
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      requests: Number(user.requests) || 0,
+      role: user.role,
+      is_active: user.is_active,
+      created_at: user.created_at,
+      expires_at: user.expires_at,
+      transaction_count: parseInt(user.transaction_count) || 0,
+      // nested shape for backward compatibility
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
-        requests: user.requests,
+        requests: Number(user.requests) || 0,
         role: user.role,
         is_active: user.is_active,
         created_at: user.created_at,
-        expiry_time: user.expiry_time,
+        expires_at: user.expires_at,
         transaction_count: parseInt(user.transaction_count) || 0
       }
     });

@@ -118,7 +118,7 @@
     },
     {
       "source": "/api/user/profile",
-      "destination": "/api/user-profile"
+      "destination": "/api/user/profile"
     },
     {
       "source": "/api/global-login-code",

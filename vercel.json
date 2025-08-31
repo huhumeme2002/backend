@@ -135,6 +135,26 @@
     {
       "source": "/api/check-balance",
       "destination": "/api/check-balance"
+    },
+    {
+      "source": "/api/user/profile-new",
+      "destination": "/api/user-profile-new"
+    },
+    {
+      "source": "/api/get-token-new",
+      "destination": "/api/get-token-new"
+    },
+    {
+      "source": "/api/redeem-key-new",
+      "destination": "/api/redeem-key-new"
+    },
+    {
+      "source": "/api/global-login-code-new",
+      "destination": "/api/global-login-code-new"
+    },
+    {
+      "source": "/api/admin/manage-user-expiry",
+      "destination": "/api/admin-manage-user-expiry"
     }
   ]
 }

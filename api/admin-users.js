@@ -86,7 +86,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'User ID là bắt buộc' });
       }
 
-      const allowedUpdates = ['role', 'is_active', 'requests', 'expires_at'];
+      const allowedUpdates = ['role', 'is_active', 'requests', 'expiry_time'];
       const updateFields = [];
       const updateValues = [];
       let paramIndex = 1;
@@ -107,7 +107,7 @@ module.exports = async function handler(req, res) {
         UPDATE users
         SET ${updateFields.join(', ')}
         WHERE id = $${paramIndex}
-        RETURNING id, username, email, requests, role, is_active, expires_at
+        RETURNING id, username, email, requests, role, is_active, expiry_time
       `;
       updateValues.push(userId);
 

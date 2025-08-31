@@ -60,12 +60,12 @@ module.exports = async function handler(req, res) {
         u.role,
         u.is_active,
         u.created_at,
-        u.expires_at,
+        u.expiry_time,
         COUNT(rt.id) as transaction_count
       FROM users u
       LEFT JOIN request_transactions rt ON u.id = rt.user_id
       WHERE u.id = $1
-      GROUP BY u.id, u.username, u.email, u.requests, u.role, u.is_active, u.created_at, u.expires_at
+      GROUP BY u.id, u.username, u.email, u.requests, u.role, u.is_active, u.created_at, u.expiry_time
     `, [userId]);
 
     if (result.rows.length === 0) {
@@ -83,7 +83,7 @@ module.exports = async function handler(req, res) {
         role: user.role,
         is_active: user.is_active,
         created_at: user.created_at,
-        expires_at: user.expires_at,
+        expiry_time: user.expiry_time,
         transaction_count: parseInt(user.transaction_count) || 0
       }
     });

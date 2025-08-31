@@ -145,6 +145,10 @@
       "destination": "/api/get-token-new"
     },
     {
+      "source": "/api/get-next-token",
+      "destination": "/api/get-next-token"
+    },
+    {
       "source": "/api/redeem-key-new",
       "destination": "/api/redeem-key-new"
     },
